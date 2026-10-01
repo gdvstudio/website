@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GDV Studio — Grupo de Desarrollo de Videojuegos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:        #0d0d0f;
+    --bg-alt:    #161619;
+    --ink:       #f2f1ee;
+    --muted:     #9a9a9d;
+    --line:      #302f33;
+    --red:       #da0131;
+    --cyan:      #8af5f2;
+    --radius:    2px;
+    --max:       1180px;
+    --pad:       clamp(20px, 5vw, 64px);
+  }
+
+  *,*::before,*::after{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:400;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior:auto; }
+    *{ animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; }
+  }
+
+  img,svg{ display:block; max-width:100%; }
+  a{ color:inherit; }
+
+  .pixel{ font-family:'Silkscreen', monospace; }
+
+  .wrap{ max-width:var(--max); margin:0 auto; padding-left:var(--pad); padding-right:var(--pad); }
+
+  ::selection{ background:var(--red); color:var(--ink); }
+
+  a:focus-visible, button:focus-visible{
+    outline:2px solid var(--cyan);
+    outline-offset:3px;
+  }
+
+  /* ---------- code-syntax section header, taken from the brand manual ---------- */
+  .code-head{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:baseline;
+    gap:0 10px;
+    margin:0 0 44px;
+  }
+  .code-head .brace{ color:#4d4d51; font-family:'Silkscreen', monospace; font-size:15px; }
+  .code-head .kw{ color:var(--red); font-family:'Silkscreen', monospace; font-size:13px; }
+  .code-head .name{
+    font-family:'Silkscreen', monospace;
+    font-size: clamp(20px, 3.4vw, 30px);
+    color:var(--ink);
+  }
+  .code-head .cond{
+    font-family:'Space Grotesk', sans-serif;
+    color:var(--muted);
+    font-size:14px;
+  }
+  .code-head .cond b{ color:var(--cyan); font-weight:500; }
+
+  /* ---------- nav ---------- */
+  header.site{
+    position:fixed; top:0; left:0; right:0; z-index:50;
+    background:rgba(13,13,15,0.86);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav{
+    max-width:var(--max); margin:0 auto; padding:16px var(--pad);
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .brand-mark{ display:flex; align-items:center; gap:10px; text-decoration:none; }
+  .brand-mark svg{ height:26px; width:auto; }
+  .brand-mark span{ font-family:'Silkscreen', monospace; font-size:13px; letter-spacing:0.06em; color:var(--muted); }
+
+  nav.links{ display:flex; gap:30px; }
+  nav.links a{
+    text-decoration:none; font-size:14px; color:var(--muted);
+    position:relative; padding-bottom:4px; transition:color .2s ease;
+  }
+  nav.links a::after{
+    content:""; position:absolute; left:0; bottom:0; width:0; height:1px;
+    background:var(--cyan); transition:width .25s ease;
+  }
+  nav.links a:hover{ color:var(--ink); }
+  nav.links a:hover::after{ width:100%; }
+
+  .nav-toggle{ display:none; background:none; border:1px solid var(--line); color:var(--ink); padding:8px 10px; cursor:pointer; }
+
+  @media (max-width: 760px){
+    nav.links{
+      position:fixed; top:59px; left:0; right:0; bottom:0;
+      background:var(--bg); flex-direction:column; padding:30px var(--pad);
+      gap:22px; transform:translateY(-110%); transition:transform .3s ease;
+      border-top:1px solid var(--line);
+    }
+    nav.links.open{ transform:translateY(0); }
+    nav.links a{ font-size:20px; }
+    .nav-toggle{ display:block; }
+  }
+
+  /* ---------- hero ---------- */
+  .hero{
+    position:relative;
+    min-height:100svh;
+    display:flex; flex-direction:column; justify-content:center;
+    padding:120px var(--pad) 80px;
+    isolation:isolate;
+  }
+  .hero-bg{
+    position:absolute; inset:0; z-index:-1; overflow:hidden;
+  }
+  .hero-bg::before{
+    content:""; position:absolute; inset:0;
+    background:
+      repeating-linear-gradient(180deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px, transparent 1px, transparent 3px);
+  }
+  .hero-bg::after{
+    content:""; position:absolute; inset:0;
+    background:radial-gradient(60% 55% at 50% 40%, rgba(218,1,49,0.14), transparent 65%),
+               radial-gradient(45% 45% at 80% 75%, rgba(138,245,242,0.10), transparent 70%);
+  }
+  .hero-slab{
+    position:absolute; height:1px; left:0; right:0; background:var(--line);
+  }
+
+  .eyebrow-code{
+    font-family:'Silkscreen', monospace;
+    font-size:12px; color:var(--muted); margin-bottom:26px;
+  }
+  .eyebrow-code b{ color:var(--red); }
+  .eyebrow-code i{ color:var(--cyan); font-style:normal; }
+
+  .hero h1{
+    margin:0; line-height:0.98;
+    font-weight:600;
+    font-size:clamp(46px, 9.5vw, 118px);
+    letter-spacing:-0.01em;
+  }
+  .glitch-word{
+    position:relative; display:inline-block;
+  }
+  .glitch-word .g-cyan, .glitch-word .g-red{
+    position:absolute; top:0; left:0; width:100%; z-index:-1;
+    opacity:0.7;
+  }
+  .glitch-word .g-cyan{ color:var(--cyan); transform:translate(3px,-2px); }
+  .glitch-word .g-red{ color:var(--red); transform:translate(-3px,2px); }
+  .glitch-word.play .g-cyan{ animation:shift-c 3.2s steps(1) infinite; }
+  .glitch-word.play .g-red{ animation:shift-r 3.2s steps(1) infinite; }
+  @keyframes shift-c{
+    0%,100%{ transform:translate(3px,-2px); opacity:.7; } 42%{ transform:translate(3px,-2px); opacity:.7; }
+    44%{ transform:translate(-4px,1px); opacity:.9; } 47%{ transform:translate(3px,-2px); opacity:.7; }
+  }
+  @keyframes shift-r{
+    0%,100%{ transform:translate(-3px,2px); opacity:.7; } 42%{ transform:translate(-3px,2px); opacity:.7; }
+    44%{ transform:translate(4px,-1px); opacity:.9; } 47%{ transform:translate(-3px,2px); opacity:.7; }
+  }
+
+  .hero p.lead{
+    max-width:520px; margin:30px 0 0;
+    color:var(--muted); font-size:17px; line-height:1.6;
+  }
+
+  .hero-meta{
+    margin-top:56px; display:flex; gap:48px; flex-wrap:wrap;
+  }
+  .hero-meta div b{
+    display:block; font-family:'Silkscreen', monospace; font-size:22px; color:var(--ink);
+  }
+  .hero-meta div span{ font-size:12px; color:var(--muted); }
+
+  .scroll-cue{
+    position:absolute; bottom:34px; left:var(--pad);
+    font-family:'Silkscreen', monospace; font-size:11px; color:var(--muted);
+    display:flex; align-items:center; gap:10px;
+  }
+  .scroll-cue .bar{ width:1px; height:26px; background:var(--line); position:relative; overflow:hidden; }
+  .scroll-cue .bar::after{
+    content:""; position:absolute; top:-100%; left:0; width:100%; height:100%;
+    background:var(--cyan); animation:cue 2.4s ease-in-out infinite;
+  }
+  @keyframes cue{ 0%{ top:-100%; } 60%{ top:100%; } 100%{ top:100%; } }
+
+  /* ---------- generic section ---------- */
+  section{ padding:110px var(--pad); border-top:1px solid var(--line); }
+  section .wrap-inner{ max-width:var(--max); margin:0 auto; }
+
+  /* ---------- about ---------- */
+  .about-grid{
+    display:grid; grid-template-columns:1.3fr 1fr; gap:70px;
+  }
+  .about-grid p{
+    font-size:18px; line-height:1.75; color:#d7d6d2; max-width:52ch; margin:0 0 18px;
+  }
+  .stat-list{ display:flex; flex-direction:column; }
+  .stat-row{
+    display:flex; justify-content:space-between; align-items:baseline;
+    padding:16px 0; border-bottom:1px solid var(--line);
+  }
+  .stat-row:first-child{ border-top:1px solid var(--line); }
+  .stat-row .k{ color:var(--muted); font-size:14px; }
+  .stat-row .v{ font-family:'Silkscreen', monospace; font-size:16px; color:var(--cyan); }
+
+  @media (max-width:860px){
+    .about-grid{ grid-template-columns:1fr; gap:40px; }
+  }
+
+  /* ---------- projects ---------- */
+  .proj-grid{
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(300px,1fr)); gap:1px;
+    background:var(--line); border:1px solid var(--line);
+  }
+  .proj-card{
+    background:var(--bg); padding:0; display:flex; flex-direction:column;
+    text-decoration:none; color:inherit;
+  }
+  .proj-thumb{
+    aspect-ratio:16/10; position:relative; overflow:hidden;
+    border-bottom:1px solid var(--line);
+  }
+  .proj-thumb .grid-overlay{
+    position:absolute; inset:0;
+    background-image:
+      linear-gradient(rgba(138,245,242,0.14) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(138,245,242,0.14) 1px, transparent 1px);
+    background-size:14% 20%;
+    mix-blend-mode:screen;
+    opacity:0;
+    transition:opacity .3s ease;
+  }
+  .proj-card:hover .grid-overlay{ opacity:1; }
+  .proj-card:hover .proj-thumb img, .proj-card:hover .proj-thumb .art{ transform:scale(1.04); }
+  .proj-thumb .art{ position:absolute; inset:0; transition:transform .5s ease; }
+
+  .proj-body{ padding:22px 24px 26px; display:flex; flex-direction:column; gap:10px; flex:1; }
+  .proj-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+  .proj-body h3{ margin:0; font-size:20px; font-weight:600; }
+  .tag{
+    font-family:'Silkscreen', monospace; font-size:10px; white-space:nowrap;
+    padding:5px 8px; border:1px solid var(--line); color:var(--muted);
+  }
+  .tag.on{ color:var(--cyan); border-color:rgba(138,245,242,0.35); }
+  .proj-body p{ margin:0; color:var(--muted); font-size:14.5px; line-height:1.55; }
+  .proj-foot{ margin-top:auto; padding-top:14px; display:flex; justify-content:space-between; align-items:center; }
+  .proj-genre{ font-size:12px; color:#6f6f73; }
+  .proj-link{ display:flex; align-items:center; gap:6px; font-size:13px; color:var(--ink); text-decoration:none; }
+  .proj-link svg{ width:13px; height:13px; }
+
+  /* ---------- team ---------- */
+  .team-grid{
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); gap:1px;
+    background:var(--line); border:1px solid var(--line);
+  }
+  .member{
+    background:var(--bg); padding:28px 22px; text-align:left;
+    display:flex; flex-direction:column; gap:14px;
+  }
+  .avatar{
+    width:54px; height:54px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Silkscreen', monospace; font-size:15px; color:var(--bg);
+  }
+  .member h4{ margin:0; font-size:16px; font-weight:600; }
+  .member .role{ margin:-8px 0 0; font-size:12.5px; color:var(--muted); }
+  .member-links{ display:flex; gap:14px; margin-top:2px; }
+  .member-links a{
+    width:28px; height:28px; border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--muted); text-decoration:none; transition:.2s ease;
+  }
+  .member-links a:hover{ color:var(--bg); background:var(--cyan); border-color:var(--cyan); }
+  .member-links svg{ width:14px; height:14px; }
+
+  /* ---------- contact / footer ---------- */
+  footer{
+    border-top:1px solid var(--line);
+    padding:80px var(--pad) 40px;
+  }
+  .foot-top{
+    display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:30px;
+    padding-bottom:50px;
+  }
+  .foot-top h2{
+    font-size:clamp(30px,5vw,52px); margin:0; max-width:14ch; line-height:1.08; font-weight:600;
+  }
+  .foot-cta{
+    display:inline-flex; align-items:center; gap:10px;
+    border:1px solid var(--cyan); color:var(--cyan); text-decoration:none;
+    padding:13px 20px; font-size:14px;
+  }
+  .foot-cta:hover{ background:var(--cyan); color:var(--bg); }
+  .foot-bottom{
+    border-top:1px solid var(--line); padding-top:26px;
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:14px;
+    font-size:12.5px; color:#6f6f73;
+  }
+  .foot-bottom a{ color:#6f6f73; text-decoration:none; }
+  .foot-bottom a:hover{ color:var(--muted); }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="nav">
+    <a href="#top" class="brand-mark">
+      <svg viewBox="0 0 120 60" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M60 5 C30 5 12 20 12 30 C12 40 30 55 60 55 L88 55 L108 5 Z" fill="none" stroke="#f2f1ee" stroke-width="4"/>
+        <rect x="34" y="26" width="24" height="8" fill="#f2f1ee"/>
+      </svg>
+      <span>GDV STUDIO</span>
+    </a>
+    <button class="nav-toggle" id="navToggle" aria-label="Abrir menú" aria-expanded="false">☰</button>
+    <nav class="links" id="navLinks">
+      <a href="#sobre">Sobre</a>
+      <a href="#proyectos">Proyectos</a>
+      <a href="#equipo">Equipo</a>
+      <a href="#contacto">Contacto</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+  <section class="hero" style="padding-top:120px; border-top:none;">
+    <div class="hero-bg" aria-hidden="true"></div>
+
+    <div class="eyebrow-code">
+      <span class="pixel"><b>if</b> ((equipo) == (<i>en desarrollo</i>))</span>
+    </div>
+
+    <h1>
+      <span class="glitch-word play" aria-hidden="false">
+        GDV STUDIO
+        <span class="g-cyan" aria-hidden="true">GDV STUDIO</span>
+        <span class="g-red" aria-hidden="true">GDV STUDIO</span>
+      </span>
+    </h1>
+
+    <p class="lead">
+      Grupo de Desarrollo de Videojuegos. Hacemos juegos por el gusto de hacerlos:
+      historias, mecánicas y mundos propios, construidos entre quienes formamos el equipo.
+    </p>
+
+    <div class="hero-meta">
+      <div><b>03</b><span>proyectos activos</span></div>
+      <div><b>08</b><span>integrantes</span></div>
+      <div><b>2024</b><span>desde</span></div>
+    </div>
+
+    <div class="scroll-cue"><span class="bar"></span> SCROLL</div>
+  </section>
+
+  <section id="sobre">
+    <div class="wrap-inner">
+      <div class="code-head">
+        <span class="brace pixel">{</span>
+        <span class="kw pixel">if</span>
+        <span class="name pixel">Sobre_GDV</span>
+        <span class="cond">== (<b>Grupo de Desarrollo de Videojuegos</b>)</span>
+      </div>
+
+      <div class="about-grid">
+        <div>
+          <p>
+            Somos un grupo autogestionado de desarrollo de videojuegos. Programamos, dibujamos,
+            componemos y diseñamos niveles en nuestro tiempo libre, con la idea de que un juego
+            terminado —por pequeño que sea— vale más que diez ideas sin cerrar.
+          </p>
+          <p>
+            Esta página reúne lo que venimos haciendo: los proyectos en los que trabajamos,
+            las personas que los llevamos adelante y una forma de encontrarnos.
+          </p>
+        </div>
+        <div class="stat-list">
+          <div class="stat-row"><span class="k">Formado en</span><span class="v pixel">2024</span></div>
+          <div class="stat-row"><span class="k">Integrantes</span><span class="v pixel">8</span></div>
+          <div class="stat-row"><span class="k">Proyectos en curso</span><span class="v pixel">3</span></div>
+          <div class="stat-row"><span class="k">Jams participadas</span><span class="v pixel">5</span></div>
+          <div class="stat-row"><span class="k">Sede</span><span class="v pixel">Puerto Madryn, AR</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="proyectos">
+    <div class="wrap-inner">
+      <div class="code-head">
+        <span class="brace pixel">{</span>
+        <span class="kw pixel">if</span>
+        <span class="name pixel">Proyectos</span>
+        <span class="cond">== (<b>destacados</b>)</span>
+      </div>
+
+      <div class="proj-grid">
+
+        <a class="proj-card" href="#" target="_blank" rel="noopener">
+          <div class="proj-thumb">
+            <div class="art" style="background:
+              radial-gradient(60% 60% at 30% 30%, rgba(218,1,49,.55), transparent 60%),
+              radial-gradient(50% 60% at 80% 70%, rgba(138,245,242,.4), transparent 65%),
+              #17171a;"></div>
+            <div class="grid-overlay"></div>
+          </div>
+          <div class="proj-body">
+            <div class="proj-top">
+              <h3>Nombre del Proyecto 1</h3>
+              <span class="tag on">EN DESARROLLO</span>
+            </div>
+            <p>Una línea corta que resuma la premisa del juego: de qué se trata y qué lo hace distinto.</p>
+            <div class="proj-foot">
+              <span class="proj-genre">Plataformas · 2D</span>
+              <span class="proj-link">
+                Ver más
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
+              </span>
+            </div>
+          </div>
+        </a>
+
+        <a class="proj-card" href="#" target="_blank" rel="noopener">
+          <div class="proj-thumb">
+            <div class="art" style="background:
+              radial-gradient(55% 55% at 70% 30%, rgba(138,245,242,.5), transparent 60%),
+              radial-gradient(55% 55% at 25% 75%, rgba(218,1,49,.4), transparent 65%),
+              #17171a;"></div>
+            <div class="grid-overlay"></div>
+          </div>
+          <div class="proj-body">
+            <div class="proj-top">
+              <h3>Nombre del Proyecto 2</h3>
+              <span class="tag">DEMO DISPONIBLE</span>
+            </div>
+            <p>Una línea corta que resuma la premisa del juego: de qué se trata y qué lo hace distinto.</p>
+            <div class="proj-foot">
+              <span class="proj-genre">Puzzle · Narrativo</span>
+              <span class="proj-link">
+                Ver más
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
+              </span>
+            </div>
+          </div>
+        </a>
+
+        <a class="proj-card" href="#" target="_blank" rel="noopener">
+          <div class="proj-thumb">
+            <div class="art" style="background:
+              radial-gradient(50% 60% at 50% 40%, rgba(218,1,49,.35), transparent 60%),
+              radial-gradient(60% 60% at 80% 80%, rgba(138,245,242,.35), transparent 65%),
+              #17171a;"></div>
+            <div class="grid-overlay"></div>
+          </div>
+          <div class="proj-body">
+            <div class="proj-top">
+              <h3>Nombre del Proyecto 3</h3>
+              <span class="tag">LANZADO</span>
+            </div>
+            <p>Una línea corta que resuma la premisa del juego: de qué se trata y qué lo hace distinto.</p>
+            <div class="proj-foot">
+              <span class="proj-genre">Arcade · Local co-op</span>
+              <span class="proj-link">
+                Ver más
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
+              </span>
+            </div>
+          </div>
+        </a>
+
+      </div>
+    </div>
+  </section>
+
+  <section id="equipo">
+    <div class="wrap-inner">
+      <div class="code-head">
+        <span class="brace pixel">{</span>
+        <span class="kw pixel">if</span>
+        <span class="name pixel">Equipo</span>
+        <span class="cond">== (<b>quienes hacemos GDV</b>)</span>
+      </div>
+
+      <div class="team-grid">
+
+        <div class="member">
+          <div class="avatar" style="background:var(--red);">NA</div>
+          <div>
+            <h4>Nombre Apellido</h4>
+            <p class="role">Programación</p>
+          </div>
+          <div class="member-links">
+            <a href="#" aria-label="itch.io"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 2 7v3c0 6 4 10 10 12 6-2 10-6 10-12V7L12 2zm0 5a3 3 0 110 6 3 3 0 010-6z"/></svg></a>
+            <a href="#" aria-label="GitHub"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12c0 4.4 2.9 8.2 6.8 9.5.5.1.7-.2.7-.5v-1.8c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8.1-.7.4-1.1.6-1.4-2.3-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.5-1.3.1-2.7 0 0 .8-.3 2.7 1a9.4 9.4 0 015 0c1.9-1.3 2.7-1 2.7-1 .6 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.3 4.7-4.6 5 .4.3.7 1 .7 2v3c0 .3.2.6.7.5A10 10 0 0022 12c0-5.5-4.5-10-10-10z"/></svg></a>
+            <a href="#" aria-label="X / Twitter"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.3 2H21l-6.7 7.6L22 22h-6.9l-5.4-6.9L3.6 22H1l7.2-8.2L2 2h7l4.9 6.3L18.3 2z"/></svg></a>
+          </div>
+        </div>
+
+        <div class="member">
+          <div class="avatar" style="background:var(--cyan);">NA</div>
+          <div>
+            <h4>Nombre Apellido</h4>
+            <p class="role">Arte y animación</p>
+          </div>
+          <div class="member-links">
+            <a href="#" aria-label="itch.io"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 2 7v3c0 6 4 10 10 12 6-2 10-6 10-12V7L12 2zm0 5a3 3 0 110 6 3 3 0 010-6z"/></svg></a>
+            <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.2c3.2 0 3.6 0 4.9.1 1.2.1 2 .3 2.4.5.6.2 1 .5 1.5 1 .4.4.7.9 1 1.5.2.5.4 1.2.5 2.4.1 1.3.1 1.7.1 4.9s0 3.6-.1 4.9c-.1 1.2-.3 2-.5 2.4-.3.6-.6 1-1 1.5-.5.4-.9.7-1.5 1-.5.2-1.2.4-2.4.5-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-1.2-.1-2-.3-2.4-.5-.6-.3-1-.6-1.5-1-.4-.5-.7-.9-1-1.5-.2-.5-.4-1.2-.5-2.4-.1-1.3-.1-1.7-.1-4.9s0-3.6.1-4.9c.1-1.2.3-2 .5-2.4.2-.6.6-1 1-1.5.5-.4.9-.7 1.5-1 .5-.2 1.2-.4 2.4-.5C8.4 2.2 8.8 2.2 12 2.2zm0 1.8c-3.1 0-3.5 0-4.7.1-1 0-1.6.2-2 .4-.5.2-.8.4-1.2.7-.3.4-.5.7-.7 1.2-.2.4-.3 1-.4 2-.1 1.2-.1 1.6-.1 4.7s0 3.5.1 4.7c0 1 .2 1.6.4 2 .2.5.4.8.7 1.2.4.3.7.5 1.2.7.4.2 1 .3 2 .4 1.2.1 1.6.1 4.7.1s3.5 0 4.7-.1c1 0 1.6-.2 2-.4.5-.2.8-.4 1.2-.7.3-.4.5-.7.7-1.2.2-.4.3-1 .4-2 .1-1.2.1-1.6.1-4.7s0-3.5-.1-4.7c0-1-.2-1.6-.4-2-.2-.5-.4-.8-.7-1.2-.4-.3-.7-.5-1.2-.7-.4-.2-1-.3-2-.4-1.2-.1-1.6-.1-4.7-.1zm0 3.5a4.5 4.5 0 110 9 4.5 4.5 0 010-9zm0 1.8a2.7 2.7 0 100 5.4 2.7 2.7 0 000-5.4zm5.7-2a1 1 0 110 2.1 1 1 0 010-2.1z"/></svg></a>
+          </div>
+        </div>
+
+        <div class="member">
+          <div class="avatar" style="background:#3c3c3b;">NA</div>
+          <div>
+            <h4>Nombre Apellido</h4>
+            <p class="role">Diseño de niveles</p>
+          </div>
+          <div class="member-links">
+            <a href="#" aria-label="itch.io"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 2 7v3c0 6 4 10 10 12 6-2 10-6 10-12V7L12 2zm0 5a3 3 0 110 6 3 3 0 010-6z"/></svg></a>
+            <a href="#" aria-label="GitHub"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12c0 4.4 2.9 8.2 6.8 9.5.5.1.7-.2.7-.5v-1.8c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8.1-.7.4-1.1.6-1.4-2.3-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.5-1.3.1-2.7 0 0 .8-.3 2.7 1a9.4 9.4 0 015 0c1.9-1.3 2.7-1 2.7-1 .6 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.3 4.7-4.6 5 .4.3.7 1 .7 2v3c0 .3.2.6.7.5A10 10 0 0022 12c0-5.5-4.5-10-10-10z"/></svg></a>
+          </div>
+        </div>
+
+        <div class="member">
+          <div class="avatar" style="background:var(--red);">NA</div>
+          <div>
+            <h4>Nombre Apellido</h4>
+            <p class="role">Sonido y música</p>
+          </div>
+          <div class="member-links">
+            <a href="#" aria-label="itch.io"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 2 7v3c0 6 4 10 10 12 6-2 10-6 10-12V7L12 2zm0 5a3 3 0 110 6 3 3 0 010-6z"/></svg></a>
+            <a href="#" aria-label="SoundCloud"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 11.5a.5.5 0 011 0v6a.5.5 0 01-1 0v-6zm2.2-1.8a.5.5 0 011 0v8a.5.5 0 01-1 0v-8zm2.3-.9a.5.5 0 011 0v9.4a.5.5 0 01-1 0V8.8zm2.4-1.3a.6.6 0 011.1 0v10.9a.6.6 0 01-1.1 0V7.5zm2.5.4c0-.4.3-.7.7-.7.3 0 .6.3.6.7v9.9c0 .4-.3.7-.6.7-.4 0-.7-.3-.7-.7V7.9zm2.5-2.6c.4 0 .8.4.8.8v11.6c0 .4-.4.8-.8.8-.5 0-.8-.4-.8-.8V6.1c0-.4.3-.8.8-.8zm2.7 1.6c2.4 0 4.4 2 4.4 4.5 0 2.4-2 4.4-4.4 4.4h-.3c-.3 0-.5-.2-.5-.5V6.6c0-.3.2-.5.5-.5.1 0 .2 0 .3 0z"/></svg></a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer id="contacto">
+  <div class="wrap-inner">
+    <div class="foot-top">
+      <h2>¿Querés sumarte o proponernos algo?</h2>
+      <a class="foot-cta" href="mailto:hola@gdvstudio.com">
+        Escribinos
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M7 17L17 7M7 7h10v10"/></svg>
+      </a>
+    </div>
+    <div class="foot-bottom">
+      <span>GDV Studio — Grupo de Desarrollo de Videojuegos, Puerto Madryn, Argentina</span>
+      <span><a href="#top">Volver arriba ↑</a></span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const toggle = document.getElementById('navToggle');
+  const links = document.getElementById('navLinks');
+  toggle.addEventListener('click', () => {
+    const open = links.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', open);
+  });
+  links.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+    links.classList.remove('open');
+    toggle.setAttribute('aria-expanded', 'false');
+  }));
+</script>
+
+</body>
+</html>
